@@ -68,11 +68,21 @@
     path: "{{ local_path.stat.path }}/{{ keycloak.bundle }}"
   register: local_archive_path
   delegate_to: localhost
+    when: 
+  - not keycloak.offline_install
+
+- name: Check offline archive
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ keycloak.bundle }}"
+  register: local_archive_path
+  delegate_to: localhost
+  when: 
+  - keycloak.offline_install
 
 ## copy and unpack
 - name: Copy archive to target nodes
   ansible.builtin.copy:
-    src: "{{ local_path.stat.path }}/{{ keycloak.bundle }}"
+    src: "{{ local_archive_path.stat.path }}"
     dest: "{{ archive }}"
     owner: "{{ keycloak.service_user }}"
     group: "{{ keycloak.service_group }}"
